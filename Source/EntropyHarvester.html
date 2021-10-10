@@ -1,0 +1,137 @@
+<html>
+<body onkeyup="Session.Instance.entropyGatherFromEventKey(this);">
+
+<div id="divMain">
+
+	<h3>Entropy Harvester</h3>
+
+	<p>Type on the keyboard to harvest entropy (randomness).</p>
+
+	<div>
+		<label>Bits Gathered So Far:</label>
+		<br />
+		<textarea id="textareaBits" cols="40" rows="10" disabled="true"></textarea>
+	</div>
+
+	<div>
+		<label>As Hexadecimal:</label>
+		<br />
+		<textarea id="textareaHexadecimal" cols="40" rows="10" disabled="true"></textarea>
+	</div>
+
+	<div>
+		<label>As Base64:</label>
+		<br />
+		<textarea id="textareaBase64" cols="40" rows="10" disabled="true"></textarea>
+	</div>
+
+	<button onclick="Session.Instance.entropyGatheringReset();">Reset</button>
+
+</div>
+
+<script type="text/javascript">
+
+// classes
+
+class Session
+{
+	constructor()
+	{
+		this.entropyBitsGatheredAsString = "";
+		this.timeOfPreviousKeyEvent = new Date();
+	}
+
+	static Instance = new Session();
+
+	// methods
+
+	entropyGatherFromEventKey(event)
+	{
+		var now = new Date();
+
+		var millisecondsSincePreviousKeyEvent =
+			now.getTime()
+			- this.timeOfPreviousKeyEvent.getTime();
+
+		var entropyBitGathered =
+			millisecondsSincePreviousKeyEvent % 2;
+
+		this.entropyBitsGatheredAsString += "" + entropyBitGathered;
+
+		this.domElementUpdate();
+
+		this.timeOfPreviousKeyEvent = now;
+	}
+
+	entropyGatheringReset()
+	{
+		this.entropyBitsGatheredAsString = ""; 
+
+		this.domElementUpdate();
+	}
+
+	// dom
+
+	domElementUpdate()
+	{
+		var d = document;
+		var textareaBits = d.getElementById("textareaBits");
+		var textareaHexadecimal = d.getElementById("textareaHexadecimal");
+		var textareaBase64 = d.getElementById("textareaBase64");
+
+		textareaBits.value = this.entropyBitsGatheredAsString;
+
+		var numberOfBits = this.entropyBitsGatheredAsString.length;
+
+		var bitsPerNibble = 4;
+		var numberOfNibbles = Math.floor(numberOfBits / bitsPerNibble);
+		var entropyGatheredAsHexadecimal = "";
+
+		for (var i = 0; i < numberOfNibbles; i++)
+		{
+			var nibbleAsBitString = this.entropyBitsGatheredAsString.substr
+			(
+				i * bitsPerNibble, bitsPerNibble
+			);
+
+			var nibbleValue = parseInt(nibbleAsBitString, 2);
+
+			var nibbleValueAsHexadecimal = nibbleValue.toString(16);
+
+			entropyGatheredAsHexadecimal += nibbleValueAsHexadecimal;
+		}
+
+		textareaHexadecimal.value = entropyGatheredAsHexadecimal;
+
+		var base64DigitsAll =
+			"0123456789"
+			+ "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+			+ "abcdefghijklmnopqrstuvwxyz"
+			+ "+/";
+
+		var bitsPerSextet = 6;
+		var numberOfSextets = Math.floor(numberOfBits / bitsPerSextet);
+		var entropyGatheredAsBase64 = "";
+
+		for (var i = 0; i < numberOfSextets; i++)
+		{
+			var sextetAsBitString = this.entropyBitsGatheredAsString.substr
+			(
+				i * bitsPerSextet, bitsPerSextet
+			);
+
+			var sextetValue = parseInt(sextetAsBitString, 2);
+
+			var sextetValueAsBase64 = base64DigitsAll[sextetValue];
+
+			entropyGatheredAsBase64 += sextetValueAsBase64;
+		}
+
+		textareaBase64.value = entropyGatheredAsBase64;
+	}
+
+}
+
+</script>
+</body>
+</html>
