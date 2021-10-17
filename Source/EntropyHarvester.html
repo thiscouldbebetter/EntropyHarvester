@@ -160,17 +160,17 @@ class Session
 
 		textareaBase64.value = entropyGatheredAsBase64;
 
-		const as64 = chunk(this.entropyBitsGatheredAsString.split(''), 8)
+		const entropyBitArray = this.entropyBitsGatheredAsString.split('');
+		const entropyByteArray = chunk(entropyBitArray, 8)
 			.map(x => parseInt(x.join(''),2));
-		chunk(as64, 3)
-			.forEach((x, i) => {
+		const pixelArray = chunk(entropyByteArray, 3);
+		pixelArray.forEach((x, i) => {
 				this.imgData.data[i*4+0] = x[0];
 				this.imgData.data[i*4+1] = x[1];
 				this.imgData.data[i*4+2] = x[2];
 				this.imgData.data[i*4+3] = 255;
 			});
 		this.ctx.putImageData(this.imgData, 0, 0);
-
 	}
 
 }
