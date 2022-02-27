@@ -1,5 +1,4 @@
 <html>
-
 <head>
 	<meta name="color-scheme" content="dark light">
 </head>
@@ -16,13 +15,16 @@
 	}
 </style>
 
-<body onkeyup="Session.Instance.entropyGatherFromEventKey(this);">
+<body
+	onkeyup="Session.Instance.entropyGatherFromEventKey(this);"
+	onmousemove="Session.Instance.entropyGatherFromEventKey(this);"
+>
 
 <div id="divMain">
 
 	<h3>Entropy Harvester</h3>
 
-	<p>Type on the keyboard to harvest entropy (randomness).</p>
+	<p>Type on the keyboard or move the mouse to harvest entropy (randomness).</p>
 
 	<div>
 		<label>Bits Gathered So Far:</label>
