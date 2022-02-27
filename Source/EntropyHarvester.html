@@ -1,4 +1,20 @@
 <html>
+<head>
+	<meta name="color-scheme" content="dark light">
+</head>
+
+<style>
+	:root {
+		color-scheme: light dark;
+	}
+	canvas {
+		width: calc(40 * 0.525em);
+		image-rendering: pixelated;
+		background: #fff2;
+		margin-bottom: 1em;
+	}
+</style>
+
 <body
 	onkeyup="Session.Instance.entropyGatherFromEventKey(this);"
 	onmousemove="Session.Instance.entropyGatherFromEventKey(this);"
@@ -28,11 +44,20 @@
 		<textarea id="textareaBase64" cols="40" rows="10" disabled="true"></textarea>
 	</div>
 
+	<div>
+		<label>As Image:</label>
+		<br />
+		<canvas id="image" width="10" height="10"></canvas>
+	</div>
+
 	<button onclick="Session.Instance.entropyGatheringReset();">Reset</button>
 
 </div>
 
 <script type="text/javascript">
+
+const chunk = (list, size) => [...Array(Math.ceil(list.length / size))]
+	.map((_, i) => list.slice(i*size, i*size+size));
 
 // classes
 
@@ -42,6 +67,10 @@ class Session
 	{
 		this.entropyBitsGatheredAsString = "";
 		this.timeOfPreviousKeyEvent = new Date();
+		
+		var c = document.getElementById("image");
+		this.ctx = c.getContext("2d");
+		this.imgData = this.ctx.createImageData(c.width, c.height);
 	}
 
 	static Instance = new Session();
@@ -81,6 +110,7 @@ class Session
 		var textareaBits = d.getElementById("textareaBits");
 		var textareaHexadecimal = d.getElementById("textareaHexadecimal");
 		var textareaBase64 = d.getElementById("textareaBase64");
+		var imageBase64 = d.getElementById("imageBase64");
 
 		textareaBits.value = this.entropyBitsGatheredAsString;
 
@@ -131,6 +161,18 @@ class Session
 		}
 
 		textareaBase64.value = entropyGatheredAsBase64;
+
+		const entropyBitArray = this.entropyBitsGatheredAsString.split('');
+		const entropyByteArray = chunk(entropyBitArray, 8)
+			.map(x => parseInt(x.join(''),2));
+		const pixelArray = chunk(entropyByteArray, 3);
+		pixelArray.forEach((x, i) => {
+				this.imgData.data[i*4+0] = x[0];
+				this.imgData.data[i*4+1] = x[1];
+				this.imgData.data[i*4+2] = x[2];
+				this.imgData.data[i*4+3] = 255;
+			});
+		this.ctx.putImageData(this.imgData, 0, 0);
 	}
 
 }
